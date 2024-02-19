@@ -144,16 +144,55 @@ def plot_histograms(df):
     plt.savefig('connection_histograms.png')
 
 
+def find_extreme_performance_times_and_values(df):
+    """
+    Нахождение времени и значений максимальной и минимальной скорости загрузки,
+    выгрузки данных и задержки отправки эхо-запросов командой ping.
+    """
+    # Максимальная и минимальная скорость загрузки
+    max_download_idx = df['Download (Mbit/s)'].idxmax()
+    min_download_idx = df['Download (Mbit/s)'].idxmin()
+
+    # Максимальная и минимальная скорость выгрузки
+    max_upload_idx = df['Upload (Mbit/s)'].idxmax()
+    min_upload_idx = df['Upload (Mbit/s)'].idxmin()
+
+    # Максимальная и минимальная задержка отправки эхо-запросов командой ping
+    max_ping_idx = df['Ping (ms)'].idxmax()
+    min_ping_idx = df['Ping (ms)'].idxmin()
+
+    print(f"\nМаксимальная скорость загрузки {df.loc[max_download_idx, 'Download (Mbit/s)']} Мбит/с была в "
+          f"{df.loc[max_download_idx, 'Time']}, минимальная {df.loc[min_download_idx, 'Download (Mbit/s)']} Мбит/с - в "
+          f"{df.loc[min_download_idx, 'Time']}.")
+    print(f"Максимальная скорость выгрузки {df.loc[max_upload_idx, 'Upload (Mbit/s)']} Мбит/с была в "
+          f"{df.loc[max_upload_idx, 'Time']}, минимальная {df.loc[min_upload_idx, 'Upload (Mbit/s)']} Мбит/с - в "
+          f"{df.loc[min_upload_idx, 'Time']}.")
+    print(f"Максимальная задержка пинга {df.loc[max_ping_idx, 'Ping (ms)']} мс была в "
+          f"{df.loc[max_ping_idx, 'Time']}, минимальная {df.loc[min_ping_idx, 'Ping (ms)']} мс - в "
+          f"{df.loc[min_ping_idx, 'Time']}.")
+
+
 if __name__ == "__main__":
     # Загрузка и подготовка данных
     filename = 'rpi_data_compact.csv'
     df = load_and_prepare_data(filename)
+
+    # Анализ пропущенных значений
+    analyze_nans(df)
+
+    # Очистка данных
     df_clean = clean_data(df)
+
+    # Вычисление статистических характеристик
+    compute_statistics(df_clean)
 
     # Выполнение функций построения графиков
     plot_connection_stats(df_clean)
     plot_connection_stats_with_style(df_clean)
     plot_histograms(df_clean)
 
+    find_extreme_performance_times_and_values(df_clean)
+
     # Сохранение обработанных данных в новый файл
     df_clean.to_csv('rpi_data_processed.csv', index=False)
+
